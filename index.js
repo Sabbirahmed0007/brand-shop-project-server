@@ -26,10 +26,21 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+    client.connect();
 
     const userCollection= client.db('userDB').collection('users');
     const dataCollection= client.db('userDB').collection('data');
 
+
+    // create user from register from
+    app.post('/users', async(req, res)=>{
+        const user = req.body;
+        console.log('user',user);
+        const result = await userCollection.insertOne(user);
+        console.log(result);
+    })
+
+    // add/ create data from add product
     app.post('/data', async(req, res)=>{
             const data= req.body;
             console.log("User", data);
@@ -37,6 +48,20 @@ async function run() {
             console.log(result);
             res.send(result);
     })
+
+    // display all data;
+    app.get('/data', async(req, res)=>{
+      const result= await dataCollection.find().toArray();
+      console.log(result);
+      res.send(result)
+
+    })
+
+    // get data according to brand
+
+    
+
+
 
 
 
