@@ -1,11 +1,11 @@
 const express =require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app= express();
 const port = process.env.PORT || 5000;
 
-
+////middlewares
 app.use(cors());
 app.use(express.json());
 
@@ -25,11 +25,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     client.connect();
 
     const userCollection= client.db('userDB').collection('users');
     const dataCollection= client.db('userDB').collection('data');
+    // const cartCollection= client.db('userDB').collection('cart');
 
 
     // create user from register from
@@ -38,12 +39,12 @@ async function run() {
         console.log('user',user);
         const result = await userCollection.insertOne(user);
         console.log(result);
+        res.send(result)
     })
 
     // add/ create data from add product
     app.post('/data', async(req, res)=>{
             const data= req.body;
-            console.log("User", data);
             const result = await dataCollection.insertOne(data);
             console.log(result);
             res.send(result);
@@ -59,8 +60,37 @@ async function run() {
 
     // get data according to brand
 
-    
+    app.get('/data/:brandName', async(req, res) =>{
+      const brandData= req.params.brandName;
+      console.log(brandData)
+      const query= { brandName : new ObjectId(brandData)};
+      const result= await dataCollection.find(query).toArray();
+      console.log(result);
+      res.send(result);
+  })
+    app.get('/singledata/:id', async(req, res)=>{
+      const id= req.params.id;
+      console.log(id)
+      const query={ _id : new ObjectId(id)};
+      const result=await dataCollection.findOne(query);
+      console.log(result);
+      res.send(result);
+  })
 
+
+
+  app.patch('/users', async(req, res)=>{
+
+    const user = req.body;
+    const filter= {email: user.email};
+    const updatedDoc= {
+        $set: {
+            lastloggedAt: user.lastloggedAt,
+        }
+    };
+    const result= await userCollection.updateOne(filter, updatedDoc)
+    res.send(result);
+})
 
 
 
@@ -72,6 +102,7 @@ async function run() {
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
+    // client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
