@@ -30,7 +30,7 @@ async function run() {
 
     const userCollection= client.db('userDB').collection('users');
     const dataCollection= client.db('userDB').collection('data');
-    // const cartCollection= client.db('userDB').collection('cart');
+    const cartCollection= client.db('userDB').collection('cart');
 
 
     // create user from register from
@@ -77,6 +77,41 @@ async function run() {
       res.send(result);
   })
 
+  app.put('/singledata/:id', async(req, res)=>{
+    const id= req.params.id;
+    console.log(id);
+    const filter= {_id: new ObjectId(id)};
+    const options= {upsert: true};
+    const updatedData= req.body;
+    const currentdata={
+      $set: {
+        name: updatedData.name,
+        brandName: updatedData.brandName,
+        photo: updatedData.photo,
+        category: updatedData.category,
+        description: updatedData.description,
+        price: updatedData.price,
+        rating: updatedData.rating,
+      }
+    };
+    const result= await dataCollection.updateOne(filter, currentdata, options);
+    console.log(result)
+    res.send(result);
+  })
+  app.get('/cart', async(req, res)=>{
+      const result= await cartCollection.find().toArray();
+      console.log(result);
+      res.send(result)
+  })
+
+  //add to cart collection
+  app.post('/cart', async(req, res)=>{
+    const data= req.body;
+    const result = await cartCollection.insertOne(data);
+    console.log(result);
+    res.send(result);
+
+  })
 
 
   app.patch('/users', async(req, res)=>{
