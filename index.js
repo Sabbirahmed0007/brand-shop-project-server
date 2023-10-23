@@ -77,7 +77,7 @@ async function run() {
       res.send(result);
   })
 
-  app.put('/singledata/:id', async(req, res)=>{
+  app.put('/data/:id', async(req, res)=>{
     const id= req.params.id;
     console.log(id);
     const filter= {_id: new ObjectId(id)};
@@ -98,6 +98,8 @@ async function run() {
     console.log(result)
     res.send(result);
   })
+
+  ///show add to cart 
   app.get('/cart', async(req, res)=>{
       const result= await cartCollection.find().toArray();
       console.log(result);
